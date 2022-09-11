@@ -1,0 +1,48 @@
+import json
+import socket
+import ssl # Secure Sockets Layer, aka TLS (Transport Layer Security)
+
+# Global Variables
+HELLO_MESSAGE = '{"type": "hello", "northeastern_username": "koo.k"}\n'
+
+
+def wordle_client():
+    print("client start")
+    host = 'proj1.3700.network'
+    port = 27993
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
+    # with socket.create_connection((host, port)) as sock:
+    #     with context.wrap_socket(sock, server_hostname=host) as sock_w:
+    #         print(sock_w.version())
+
+    #         # Sending the "hello" request message to the server
+    #         # Mike note: What you pass into send() might need to be bytes
+    #         sock_w.send(HELLO_MESSAGE)
+
+    #         # Receiving the "hello" response message from the server
+    #         # Might need to do a recv() here
+    #         hello_data_json = socket.recv(1024)
+    #         hello_data = json.loads(hello_data_json)
+    #         print(hello_data)
+
+    #         loop = False
+    #         while(loop):
+    #             print('im looping')
+
+    with socket.create_connection((host, port)) as sock:
+        sock.send(HELLO_MESSAGE.encode())
+        hello_data_json = sock.recv(1024)
+        hello_data = json.loads(hello_data_json)
+        print(type(hello_data_json))
+        print(hello_data_json)
+        print(type(hello_data))
+        print(hello_data)
+
+
+
+
+
+# Entry point of the program LOOK UP WHY THIS IS ON STACK
+if __name__ == '__main__':
+    wordle_client()
