@@ -21,11 +21,31 @@ def encode_guess(guess):
     #print(guess_json)
     return guess_json
 
+# Take a guess word, wordle reply array, and a word list -> returns the word list
+def filter_wordlist(guess, marks, word_list):
+
+    green = {} # Dict of letters where their position is known
+    yellow = set() # Set of letters that are in the word (but wrong place)
+    red = set() # Set of letters that are not in the word
+    for i in marks:
+        if(marks[i] == 0):
+            red.add(guess[i])
+        if(marks[i] == 1):
+            yellow.add(guess[i])
+        if(marks[i] == 2):
+            green[marks[i]] = i
+
+    for word in word_list: # Remove wrong words
+        # Check if word contains green in correct spot
+        
+        
+
+# Guess based on alphabet?
 
 # Main function communicating with the socket. Can be given an unencoded socket and a wrapped encoded socket to get both results.
 def socket_comm(sock):
     sock.send(HELLO_MESSAGE.encode())
-    hello_data_json = sock.recv(1024)
+    hello_data_json = sock.recv(1024) #may need to set into a loop to make sure recieved whole JSON 
     hello_data = json.loads(hello_data_json)
     print(type(hello_data))
     print(hello_data)
@@ -86,7 +106,7 @@ def wordle_client():
 
 # Entry point of the program LOOK UP WHY THIS IS ON STACK
 if __name__ == '__main__':
-    wordle_client()
+    #wordle_client()
     #encode_guess('slate')
     
 
