@@ -30,10 +30,10 @@ def filter_wordlist(guess, marks, word_list):
 
     green = {} # Dict of letters where their position is known
     yellow = {} # Set of letters that are in the word (but wrong place)
-    red = set() # Set of letters that are not in the word
+    red = {} # Set of letters that are not in the word
     for i in range(len(marks)):
         if(marks[i] == 0):
-            red.add(guess[i])
+            red[i] = guess[i]
         if(marks[i] == 1):
             yellow[i] = guess[i] # May need to change to remove words where yellow letters are in same spot
         if(marks[i] == 2): # Need to make key the letter index in case of repeating letters (e.g. apple)
@@ -53,7 +53,8 @@ def filter_wordlist(guess, marks, word_list):
                 break
         if(skip): continue
         for r in red:
-            if(r in word):
+            # Marks can have duplicate letters - only remove letters if they are not mentioned in green or yellow
+            if(red[r] in word) and (red[r] not in list(green.values())) and (red[r] not in list(yellow.values())):
                 skip = True
                 break
         if(skip): continue
@@ -89,13 +90,12 @@ def socket_comm(sock):
         print("reply:", reply)
 
         if (reply['type'] == 'retry'):
+            word_list = word_list[1:]# Remove last guess from word_list to prevent loops
             mark_dict = reply['guesses'][len(reply['guesses']) - 1] # Take the latest guess mark combo
             marks = mark_dict['marks']
             word_list = filter_wordlist(guess, marks, word_list)
             print(word_list[:10])
             print("list length:", len(word_list))
-            if len(word_list) < 20:
-                print(word_list)
             guess = word_list[0]
 
         elif (reply['type'] == 'bye'):
@@ -143,3 +143,4 @@ if __name__ == '__main__':
     wordle_client()
     #encode_guess('slate')
     #test_remove()
+
