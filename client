@@ -20,7 +20,6 @@ args = parser.parse_args()
 # Global Variables
 ID = "to be set"
 STARTING_WORD = 'slate'
-#HELLO_MESSAGE = '{"type": "hello", "northeastern_username": "koo.k"}\n'
 
 # Encode a string word in to a JSON guess and returns it
 # String -> String(JSON)
@@ -50,7 +49,6 @@ def filter_wordlist(guess, marks, word_list):
             yellow[i] = guess[i] # May need to change to remove words where yellow letters are in same spot
         if(marks[i] == 2): # Need to make key the letter index in case of repeating letters (e.g. apple)
             green[i] = guess[i]
-    print("green:", green, "yellow:", yellow, "red:", red)
 
     for word in word_list: # Remove wrong words
         skip = False
@@ -71,8 +69,6 @@ def filter_wordlist(guess, marks, word_list):
                 break
         if(skip): continue
         new_wordlist.append(word)
-    #for item in new_wordlist[:10]:
-    #    print(item)
     return new_wordlist
 
 # Main function communicating with the socket. Can be given an unencoded socket and a wrapped encoded socket to get both results.
@@ -83,7 +79,6 @@ def socket_comm(sock):
     sock.send(hello_message.encode())
     hello_data_json = sock.recv(1024) #may need to set into a loop to make sure recieved whole JSON 
     hello_data = json.loads(hello_data_json)
-    print(hello_data)
     global ID # Global variable being modified
     ID = hello_data['id']
 
@@ -92,31 +87,24 @@ def socket_comm(sock):
     data = word_list_file.read()
     word_list_file.close()
     word_list = data.split('\n')
-    #print("starting len", len(word_list))
-    #print("starting list preview:", word_list[:10])
 
     guess = STARTING_WORD
     loop = True # Set false when accept reply is given
     while(loop):
-        print("Guessing word:", guess)
         guess_json = encode_guess(guess)
         sock.send(guess_json.encode())
         reply_json = sock.recv(1024) #May have to change this to loop until end char received
         reply = json.loads(reply_json)
-        #print("reply:", reply)
 
         if (reply['type'] == 'retry'):
             word_list = word_list[1:]# Remove last guess from word_list to prevent loops
             mark_dict = reply['guesses'][len(reply['guesses']) - 1] # Take the latest guess mark combo
             marks = mark_dict['marks']
             word_list = filter_wordlist(guess, marks, word_list)
-            #print(word_list[:10])
-            #print("list length:", len(word_list))
             guess = word_list[0]
 
         elif (reply['type'] == 'bye'):
-            print("Correct word is: ", guess)
-            print("Flag is: ", reply['flag'])
+            print(reply['flag'])
             loop = False
             sys.exit()
 
@@ -129,12 +117,7 @@ def wordle_client():
 
     host = args.hostname
     port = args.port
-    #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     context = ssl.create_default_context()
-
-    # with socket.create_connection((host, port)) as sock:
-    #     with context.wrap_socket(sock, server_hostname=host) as sock_w:
-    #         print(sock_w.version())
 
     print(type(host), host)
     print(type(port), port)
@@ -147,24 +130,8 @@ def wordle_client():
         with socket.create_connection((host, port)) as sock:
             socket_comm(sock)
 
-def test(alist):
-    for i in alist:
-        if i == 'a':
-            print(i)
-            i = 'b'
-    print(alist)
-
-def test_remove():
-    #Correct word: craft
-    #First guess: slate
-    word_list = ['craft', 'crane', 'slate', 'seeth', 'abaft', 'grape', 'apple', 'sraft', 'frape', 'toapo', 'cratt', 'teapo']
-    test_marks = [0, 0, 2, 1, 0]
-    word_list = filter_wordlist('slate', test_marks, word_list)
-    print(word_list)
-
 # Entry point of the program, fixes args
 if __name__ == '__main__':
-    print(args)  # Easier than fiddling with default= and groups
     if args.port == None:
         if (args.s):
             args.port = 27994
