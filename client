@@ -134,5 +134,4 @@ if __name__ == '__main__':
             args.port = 27994
         else:
             args.port = 27993
-    print(args)
     wordle_client()
