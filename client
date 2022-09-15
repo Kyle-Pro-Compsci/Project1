@@ -119,9 +119,6 @@ def wordle_client():
     port = args.port
     context = ssl.create_default_context()
 
-    print(type(host), host)
-    print(type(port), port)
-
     if (args.s):
         with socket.create_connection((host, port)) as sock:
             with context.wrap_socket(sock, server_hostname=host) as sock_w:
