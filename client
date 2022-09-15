@@ -1,15 +1,25 @@
+#!/usr/bin/env python3
+
 import json
 import socket
 import ssl # Secure Sockets Layer, aka TLS (Transport Layer Security)
 import sys 
+import argparse
 
 # Unsecure flag: 0b391a1a67b5083430f5bd1bc7de5703a821eb16664fffaffd9a9fc7e2044ee4
 
+# Set command line input flags and arguments
+parser = argparse.ArgumentParser("Find the correct wordle guess from a given host socket")
+parser.add_argument('-p', '--port', type=int, help="Set the port", default=27993)
+parser.add_argument('-s', help="Opt to use an encrypted TLS socket connection", action='store_true')
+parser.add_argument('hostname', help="Specify the name of the server")
+parser.add_argument('username', help="NEU Username to login with")
+args = parser.parse_args()
+
 # Global Variables
-HELLO_MESSAGE = '{"type": "hello", "northeastern_username": "koo.k"}\n'
 ID = "to be set"
 STARTING_WORD = 'slate'
-#ALPHABET = 
+#HELLO_MESSAGE = '{"type": "hello", "northeastern_username": "koo.k"}\n'
 
 # Encode a string word in to a JSON guess and returns it
 def encode_guess(guess):
@@ -65,9 +75,13 @@ def filter_wordlist(guess, marks, word_list):
 
 # Main function communicating with the socket. Can be given an unencoded socket and a wrapped encoded socket to get both results.
 def socket_comm(sock):
-    sock.send(HELLO_MESSAGE.encode())
+    hello_dict = {'type': 'hello', 'northeastern_username' : args.username}
+    hello_message = json.dumps(hello_dict) + '\n'
+
+    sock.send(hello_message.encode())
     hello_data_json = sock.recv(1024) #may need to set into a loop to make sure recieved whole JSON 
     hello_data = json.loads(hello_data_json)
+    print(hello_data)
     global ID # Global variable being modified
     ID = hello_data['id']
 
@@ -109,16 +123,22 @@ def socket_comm(sock):
             sys.exit()
 
 def wordle_client():
-    print("client start")
-    host = 'proj1.3700.network' #May need to change to std input
+
+    #host = args.hostname
+    #port = args.port
+    host = 'proj1.3700.network'
     port = 27993
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
     # with socket.create_connection((host, port)) as sock:
     #     with context.wrap_socket(sock, server_hostname=host) as sock_w:
     #         print(sock_w.version())
 
+    print(type(host), host)
+    print(type(port), port)
+
     with socket.create_connection((host, port)) as sock:
+        print("whyy")
         socket_comm(sock)
 
 def test(alist):
@@ -140,6 +160,8 @@ def test_remove():
 
 # Entry point of the program LOOK UP WHY THIS IS ON STACK
 if __name__ == '__main__':
+
+    print(args)
     wordle_client()
     #encode_guess('slate')
     #test_remove()
