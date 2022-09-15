@@ -2,8 +2,8 @@
 
 import json
 import socket
-import ssl # Secure Sockets Layer, aka TLS (Transport Layer Security)
-import sys 
+import ssl
+import sys
 import argparse
 
 # Unsecure flag: 0b391a1a67b5083430f5bd1bc7de5703a821eb16664fffaffd9a9fc7e2044ee4
@@ -11,7 +11,7 @@ import argparse
 
 # Set command line input flags and arguments
 parser = argparse.ArgumentParser("Find the correct wordle guess from a given host socket")
-parser.add_argument('-p', '--port', type=int, help="Set the port", default=27993)
+parser.add_argument('-p', '--port', type=int, help="Set the port")
 parser.add_argument('-s', help="Opt to use an encrypted TLS socket connection", action='store_true')
 parser.add_argument('hostname', help="Specify the name of the server")
 parser.add_argument('username', help="NEU Username to login with")
@@ -124,6 +124,7 @@ def socket_comm(sock):
             print("Error JSON type received not recognized. Exiting.")
             sys.exit()
 
+# Initializes the connection to the socket. The main function for the program.
 def wordle_client():
 
     host = args.hostname
@@ -160,11 +161,14 @@ def test_remove():
     test_marks = [0, 0, 2, 1, 0]
     word_list = filter_wordlist('slate', test_marks, word_list)
     print(word_list)
-    
 
-# Entry point of the program LOOK UP WHY THIS IS ON STACK
+# Entry point of the program, fixes args
 if __name__ == '__main__':
+    print(args)  # Easier than fiddling with default= and groups
+    if args.port == None:
+        if (args.s):
+            args.port = 27994
+        else:
+            args.port = 27993
     print(args)
     wordle_client()
-
-
