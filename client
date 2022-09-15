@@ -7,6 +7,7 @@ import sys
 import argparse
 
 # Unsecure flag: 0b391a1a67b5083430f5bd1bc7de5703a821eb16664fffaffd9a9fc7e2044ee4
+# Secure flag:  15ae451dbde2c5076513127276ffd7a1d674cb327f2f8a15141df97d6a97301f
 
 # Set command line input flags and arguments
 parser = argparse.ArgumentParser("Find the correct wordle guess from a given host socket")
@@ -22,6 +23,7 @@ STARTING_WORD = 'slate'
 #HELLO_MESSAGE = '{"type": "hello", "northeastern_username": "koo.k"}\n'
 
 # Encode a string word in to a JSON guess and returns it
+# String -> String(JSON)
 def encode_guess(guess):
     if(len(guess) != 5):
         print("Warning! Guess is not a 5 character word")
@@ -90,8 +92,8 @@ def socket_comm(sock):
     data = word_list_file.read()
     word_list_file.close()
     word_list = data.split('\n')
-    print("starting len", len(word_list))
-    print("starting list preview:", word_list[:10])
+    #print("starting len", len(word_list))
+    #print("starting list preview:", word_list[:10])
 
     guess = STARTING_WORD
     loop = True # Set false when accept reply is given
@@ -101,15 +103,15 @@ def socket_comm(sock):
         sock.send(guess_json.encode())
         reply_json = sock.recv(1024) #May have to change this to loop until end char received
         reply = json.loads(reply_json)
-        print("reply:", reply)
+        #print("reply:", reply)
 
         if (reply['type'] == 'retry'):
             word_list = word_list[1:]# Remove last guess from word_list to prevent loops
             mark_dict = reply['guesses'][len(reply['guesses']) - 1] # Take the latest guess mark combo
             marks = mark_dict['marks']
             word_list = filter_wordlist(guess, marks, word_list)
-            print(word_list[:10])
-            print("list length:", len(word_list))
+            #print(word_list[:10])
+            #print("list length:", len(word_list))
             guess = word_list[0]
 
         elif (reply['type'] == 'bye'):
@@ -124,11 +126,10 @@ def socket_comm(sock):
 
 def wordle_client():
 
-    #host = args.hostname
-    #port = args.port
-    host = 'proj1.3700.network'
-    port = 27993
+    host = args.hostname
+    port = args.port
     #context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context = ssl.create_default_context()
 
     # with socket.create_connection((host, port)) as sock:
     #     with context.wrap_socket(sock, server_hostname=host) as sock_w:
@@ -137,9 +138,13 @@ def wordle_client():
     print(type(host), host)
     print(type(port), port)
 
-    with socket.create_connection((host, port)) as sock:
-        print("whyy")
-        socket_comm(sock)
+    if (args.s):
+        with socket.create_connection((host, port)) as sock:
+            with context.wrap_socket(sock, server_hostname=host) as sock_w:
+                socket_comm(sock_w)
+    else:
+        with socket.create_connection((host, port)) as sock:
+            socket_comm(sock)
 
 def test(alist):
     for i in alist:
@@ -157,12 +162,9 @@ def test_remove():
     print(word_list)
     
 
-
 # Entry point of the program LOOK UP WHY THIS IS ON STACK
 if __name__ == '__main__':
-
     print(args)
     wordle_client()
-    #encode_guess('slate')
-    #test_remove()
+
 
