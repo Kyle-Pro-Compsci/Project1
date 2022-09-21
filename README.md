@@ -1,6 +1,6 @@
 Project 1: Socket Basics
 
-This project is written in Python. It utilizes the standard Python modules for JSON, socket connection, ssl, and arg parsing.
+The goal of this project is to explore communicating with a socket by building a client application that connects to a socket server. It uses Python's native socket module (import socket) and native json module (import json). The socket server contains a wordle server that IDs a connection and assigns it a 5 letter word. When the client sends the server a word guess, the server responds with which letters are green, uellow, or red. This client application communicates with the socket server, sending guesses until it guesses the correct word.
 
 The high-level approach to guessing the correct word was a general method of elimination. It takes a file of eligible words as a list, and filters down the list each time it receives a new reply and set of marks. It only accesses the latest mark, as any older marks are irrelevant due to their corresponding words having been eliminated.
 
